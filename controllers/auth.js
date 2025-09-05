@@ -50,6 +50,7 @@ router.post('/sign-in', async (req, res) => {
     // First, get the user from the database
     const userInDatabase = await User.findOne({ username: req.body.username });
     if (!userInDatabase) {
+      console.log("user not found")
       return res.send('Login failed. Please try again.');
     }
   
@@ -59,6 +60,7 @@ router.post('/sign-in', async (req, res) => {
       userInDatabase.password
     );
     if (!validPassword) {
+      console.log("incorrect password")
       return res.send('Login failed. Please try again.');
     }
   
