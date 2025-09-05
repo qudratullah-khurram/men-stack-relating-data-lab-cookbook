@@ -1,13 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Pantry</title>
-  </head>
-  <body>
-    <%- include('./partials/_navbar.ejs') %>
-    <h1>Welcome to my Pantry</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Pantry</title>
+</head>
+<body>
+  <%- include('../partials/_navbar.ejs') %>
+
+  <% if (user) { %>
+    <h1>Welcome to the app, <%= user.username %>!</h1>
+    <p>
+      <a href="/auth/sign-out">Sign out</a>
+    </p>
+
+    <h2><%= user.username %>'s Pantry</h2>
     <a href="/users/<%= user._id %>/foods/new">Add New Item</a>
-  </body>
+
+    <% if (pantry.length > 0) { %>
+      <ul>
+        <% pantry.forEach((item) => { %>
+          <li>
+            <strong><%= item.name %></strong>
+            <% if (item.quantity) { %> - Quantity: <%= item.quantity %> <% } %>
+            <% if (item.category) { %> - Category: <%= item.category %> <% } %>
+            <% if (item.expirationDate) { %> - Expires: <%= item.expirationDate.toDateString() %> <% } %>
+
+          
+            <a href="/users/<%= user._id %>/foods/<%= item._id %>/edit">Edit</a>
+
+   
+            <form action="/users/<%= user._id %>/foods/<%= item._id %>?_method=DELETE" method="POST" style="display:inline;">
+              <button type="submit">Delete</button>
+            </form>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p>There are no items in this pantry.</p>
+    <% } %>
+
+    <p><a href="/vip-lounge">Get into the VIP Users Only lounge!</a></p>
+
+  <% } else { %>
+    <h1>Welcome to the app, guest.</h1>
+    <p>
+      <a href="/auth/sign-up">Sign up</a> or
+      <a href="/auth/sign-in">Sign in</a>.
+    </p>
+  <% } %>
+
+</body>
 </html>

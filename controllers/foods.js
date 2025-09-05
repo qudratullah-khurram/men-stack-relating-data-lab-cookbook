@@ -2,18 +2,11 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 const User = require('../models/user.js');
 
-// INDEX — GET /users/:userId/foods
 router.get('/', async (req, res) => {
   try {
-    // 1. Find the current user from the session
     const user = await User.findById(req.session.user._id);
+    if (!user) return res.redirect('/');
 
-    if (!user) {
-      console.error('User not found in session');
-      return res.redirect('/');
-    }
-
-    // 2. Send pantry items to the view
     res.render('foods/index.ejs', { user, pantry: user.pantry });
   } catch (err) {
     console.error('Error loading pantry:', err);
@@ -21,7 +14,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// NEW — GET /users/:userId/foods/new
 router.get('/new', async (req, res) => {
   try {
     const user = await User.findById(req.session.user._id);
@@ -34,22 +26,77 @@ router.get('/new', async (req, res) => {
   }
 });
 
-// CREATE — POST /users/:userId/foods
+
 router.post('/', async (req, res) => {
   try {
     const user = await User.findById(req.session.user._id);
-
     if (!user) {
       console.error('User not found in session');
       return res.redirect('/');
     }
 
-    user.pantry.push(req.body); // Add new food item
+    user.pantry.push(req.body);
     await user.save();
 
     res.redirect(`/users/${user._id}/foods`);
   } catch (err) {
     console.error('Error adding food item:', err);
+    res.redirect('/');
+  }
+});
+
+
+router.get('/:itemId/edit', async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    if (!user) return res.redirect('/');
+
+    const foodItem = user.pantry.id(req.params.itemId);
+    if (!foodItem) return res.redirect(`/users/${user._id}/foods`);
+
+    res.render('foods/edit.ejs', { user, foodItem });
+  } catch (err) {
+    console.error('Error loading edit page:', err);
+    res.redirect(`/users/${req.session.user._id}/foods`);
+  }
+});
+
+router.put('/:itemId', async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    if (!user) return res.redirect('/');
+
+    const foodItem = user.pantry.id(req.params.itemId);
+    if (!foodItem) return res.redirect(`/users/${user._id}/foods`);
+
+   
+    foodItem.name = req.body.name;
+    foodItem.quantity = req.body.quantity;
+    foodItem.category = req.body.category;
+    foodItem.expirationDate = req.body.expirationDate;
+
+    await user.save();
+    res.redirect(`/users/${user._id}/foods`);
+  } catch (err) {
+    console.error('Error updating food item:', err);
+    res.redirect(`/users/${req.session.user._id}/foods`);
+  }
+});
+
+router.delete('/:itemId', async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+      console.error('User not found in session');
+      return res.redirect('/');
+    }
+
+    user.pantry.id(req.params.itemId).remove();
+    await user.save();
+
+    res.redirect(`/users/${user._id}/foods`);
+  } catch (err) {
+    console.error('Error deleting food item:', err);
     res.redirect('/');
   }
 });
