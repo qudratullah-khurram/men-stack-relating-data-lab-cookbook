@@ -4,51 +4,53 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Pantry</title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <%- include('../partials/_navbar.ejs') %>
 
-  <% if (user) { %>
-    <h1>Welcome to the app, <%= user.username %>!</h1>
-    <p>
-      <a href="/auth/sign-out">Sign out</a>
-    </p>
+  <div class="container">
+    <% if (user) { %>
+      <h1>Welcome to the app, <%= user.username %>!</h1>
+      <p>
+        <a class="btn" href="/auth/sign-out">Sign out</a>
+      </p>
 
-    <h2><%= user.username %>'s Pantry</h2>
-    <a href="/users/<%= user._id %>/foods/new">Add New Item</a>
+      <h2><%= user.username %>'s Pantry</h2>
+      <a class="btn" href="/users/<%= user._id %>/foods/new">Add New Item</a>
 
-    <% if (pantry.length > 0) { %>
-      <ul>
-        <% pantry.forEach((item) => { %>
-          <li>
-            <strong><%= item.name %></strong>
-            <% if (item.quantity) { %> - Quantity: <%= item.quantity %> <% } %>
-            <% if (item.category) { %> - Category: <%= item.category %> <% } %>
-            <% if (item.expirationDate) { %> - Expires: <%= item.expirationDate.toDateString() %> <% } %>
+      <% if (pantry.length > 0) { %>
+        <ul>
+          <% pantry.forEach((item) => { %>
+            <li>
+              <span>
+                <strong><%= item.name %></strong>
+                <% if (item.quantity) { %> - Qty: <%= item.quantity %> <% } %>
+                <% if (item.category) { %> - Cat: <%= item.category %> <% } %>
+                <% if (item.expirationDate) { %> - Expires: <%= item.expirationDate.toDateString() %> <% } %>
+              </span>
+              <span>
+                <a class="btn" href="/users/<%= user._id %>/foods/<%= item._id %>/edit">Edit</a>
+                <form action="/users/<%= user._id %>/foods/<%= item._id %>?_method=DELETE" method="POST" style="display:inline;">
+                  <button type="submit">Delete</button>
+                </form>
+              </span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p>There are no items in this pantry.</p>
+      <% } %>
 
-          
-            <a href="/users/<%= user._id %>/foods/<%= item._id %>/edit">Edit</a>
+      <p><a class="btn" href="/vip-lounge">Get into the VIP Users Only lounge!</a></p>
 
-   
-            <form action="/users/<%= user._id %>/foods/<%= item._id %>?_method=DELETE" method="POST" style="display:inline;">
-              <button type="submit">Delete</button>
-            </form>
-          </li>
-        <% }) %>
-      </ul>
     <% } else { %>
-      <p>There are no items in this pantry.</p>
+      <h1>Welcome to the app, guest.</h1>
+      <p>
+        <a class="btn" href="/auth/sign-up">Sign up</a> or
+        <a class="btn" href="/auth/sign-in">Sign in</a>.
+      </p>
     <% } %>
-
-    <p><a href="/vip-lounge">Get into the VIP Users Only lounge!</a></p>
-
-  <% } else { %>
-    <h1>Welcome to the app, guest.</h1>
-    <p>
-      <a href="/auth/sign-up">Sign up</a> or
-      <a href="/auth/sign-in">Sign in</a>.
-    </p>
-  <% } %>
-
+  </div>
 </body>
 </html>
